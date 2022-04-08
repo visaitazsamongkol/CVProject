@@ -29,7 +29,7 @@ class _DictState extends State<Dict> {
 
   void showThesaurusDescription(String word) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      List<Map>? descriptions = globals.thesaurusCache[word];
+      final descriptions = globals.thesaurusCache[word];
       return Scaffold(
           appBar: AppBar(title: Text(word), centerTitle: true),
           body: ListView(
