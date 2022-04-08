@@ -11,6 +11,7 @@
 .vscode/
 windows/
 web/
+__pycache__
 
 # IntelliJ related
 *.iml
