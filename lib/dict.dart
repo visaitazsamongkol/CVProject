@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:http/http.dart' as http;
 import 'package:mdi/mdi.dart';
+import 'package:audioplayers/audioplayers.dart';
 import './globals.dart' as globals;
 import './dict_api/dict_search.dart' as dict_search;
 
@@ -14,21 +15,90 @@ class Dict extends StatefulWidget {
 
 class _DictState extends State<Dict> {
   bool loading = false;
+  AudioPlayer audioPlayer = AudioPlayer();
 
-  void showDictionaryDescription(String word) {
+  Widget buildDescription(dynamic description) {
+    List<Widget> definitionWidgets = <Widget>[];
+    for (int i = 0; i <= description["definitions"].length - 1; i++) {
+      String verbDivider =
+          description["definitions"][i]["verb_divider"].split(" ")[0];
+      String meaning = description["definitions"][i]["meaning"];
+      List<String> examples =
+          description["definitions"][i]["examples"].cast<String>();
+      print(meaning);
+
+      Align meaningWidget = Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+              "${i + 1} ${verbDivider == "" ? "" : "[$verbDivider] "}$meaning",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
+      definitionWidgets.add(meaningWidget);
+
+      if (examples.length != 0) {
+        bool isFirstExample = true;
+        for (String example in examples) {
+          Align exampleWidget;
+          if (isFirstExample) {
+            exampleWidget = Align(
+                alignment: Alignment.centerLeft, child: Text("e.g. $example"));
+            isFirstExample = false;
+          } else {
+            exampleWidget = Align(
+                alignment: Alignment.centerLeft,
+                child: Text("       $example"));
+          }
+          definitionWidgets.add(exampleWidget);
+        }
+      }
+
+      definitionWidgets.add(SizedBox(height: 10));
+    }
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text(
+          "${description["syllable"]} (${description["pos"]})",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        description["audio_links"].length == 0
+            ? SizedBox.shrink()
+            : IconButton(
+                onPressed: () async =>
+                    await audioPlayer.play(description["audio_links"][0]),
+                icon: const Icon(Icons.volume_up),
+                iconSize: 24,
+                color: Colors.grey,
+                tooltip: "Play the word audio")
+      ]),
+      description["audio_links"].length == 0
+          ? SizedBox(height: 15)
+          : SizedBox.shrink(),
+      ...definitionWidgets
+    ]);
+  }
+
+  void showDictionaryDescriptions(String word) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       final descriptions = globals.dictionaryCache[word];
       return Scaffold(
           appBar: AppBar(title: Text(word), centerTitle: true),
-          body: ListView(
-            children: [
-              Text(descriptions.toString()),
-            ],
-          ));
+          body: descriptions == null
+              ? Container(
+                  alignment: Alignment.center,
+                  child: Text("Not Found in Dictionary!",
+                      style: TextStyle(fontSize: 28)))
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(14, 5, 14, 5),
+                  itemCount: descriptions.length * 2 - 1,
+                  itemBuilder: (context, item) {
+                    if (item.isOdd)
+                      return Divider(thickness: 3.0, color: Colors.orange);
+                    final index = item ~/ 2;
+                    return buildDescription(descriptions[index]);
+                  }));
     }));
   }
 
-  void showThesaurusDescription(String word) {
+  void showThesaurusDescriptions(String word) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       final descriptions = globals.thesaurusCache[word];
       return Scaffold(
@@ -101,7 +171,7 @@ class _DictState extends State<Dict> {
                 if (!globals.dictionaryCache.containsKey(word)) {
                   await sendWordToDictionary(word);
                 }
-                showDictionaryDescription(word);
+                showDictionaryDescriptions(word);
               }),
           IconButton(
               iconSize: 30.0,
@@ -111,7 +181,7 @@ class _DictState extends State<Dict> {
                 if (!globals.thesaurusCache.containsKey(word)) {
                   await sendWordToThesaurus(word);
                 }
-                showThesaurusDescription(word);
+                showThesaurusDescriptions(word);
               }),
         ]));
   }

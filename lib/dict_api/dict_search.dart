@@ -19,7 +19,7 @@ dynamic search_thesaurus(String word) async {
         word_dicts.add(each_word);
       }
     }
-  } on Exception catch (_) {
+  } catch (_) {
     return null;
   }
 
@@ -72,7 +72,8 @@ dynamic search_thesaurus(String word) async {
             }
           }
 
-          if (definition['meaning'] == '') continue;
+          if (utils.del_non_alpha_endings(definition['meaning']) == '')
+            continue;
 
           definition['verb_divider'] = verb_divider;
 
@@ -127,7 +128,7 @@ dynamic search_dictionary(String word) async {
         word_dicts.add(each_word);
       }
     }
-  } on Exception catch (_) {
+  } catch (_) {
     return null;
   }
 
@@ -179,7 +180,8 @@ dynamic search_dictionary(String word) async {
             }
           }
 
-          if (definition['meaning'] == '') continue;
+          if (utils.del_non_alpha_endings(definition['meaning']) == '')
+            continue;
 
           definition['verb_divider'] = verb_divider;
 
