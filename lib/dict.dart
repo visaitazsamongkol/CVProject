@@ -1,14 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:string_extensions/string_extensions.dart';
-import 'package:http/http.dart' as http;
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:mdi/mdi.dart';
 import 'package:audioplayers/audioplayers.dart';
-import './globals.dart' as globals;
-import './dict_api/dict_search.dart' as dict_search;
+import 'globals.dart' as globals;
+import 'dict_api/dict_search.dart' as dict_search;
 
 class Dict extends StatefulWidget {
+  const Dict({Key? key}) : super(key: key);
+
   @override
   State<Dict> createState() => _DictState();
 }
@@ -17,7 +17,20 @@ class _DictState extends State<Dict> {
   bool loading = false;
   AudioPlayer audioPlayer = AudioPlayer();
 
-  Widget buildDescription(dynamic description) {
+  Widget getRichTextSpan(String boldText, String normalText) {
+    return RichText(
+      text: TextSpan(
+          style: const TextStyle(fontSize: 14, color: Colors.black),
+          children: <TextSpan>[
+            TextSpan(
+                text: boldText,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: normalText)
+          ]),
+    );
+  }
+
+  Widget buildDictionaryDescription(dynamic description) {
     List<Widget> definitionWidgets = <Widget>[];
     if (description["definitions"].length > 0) {
       for (int i = 0; i <= description["definitions"].length - 1; i++) {
@@ -26,52 +39,62 @@ class _DictState extends State<Dict> {
         String meaning = description["definitions"][i]["meaning"];
         List<String> examples =
             description["definitions"][i]["examples"].cast<String>();
-        print(meaning);
+        List<String> categories =
+            description["definitions"][i]["categories"].cast<String>();
 
         Align meaningWidget = Align(
             alignment: Alignment.centerLeft,
             child: Text(
-                "${i + 1} ${verbDivider == "" ? "" : "[$verbDivider] "}$meaning",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
+                "${i + 1}  ${verbDivider == "" ? "" : "[$verbDivider] "}${categories.isEmpty ? "" : "[${categories.join("/")}] "}$meaning",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade800)));
         definitionWidgets.add(meaningWidget);
 
-        if (examples.length != 0) {
+        if (examples.isNotEmpty) {
           bool isFirstExample = true;
           for (String example in examples) {
             Align exampleWidget;
             if (isFirstExample) {
               exampleWidget = Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("e.g. $example"));
+                  child: getRichTextSpan("e.g. ", example));
               isFirstExample = false;
             } else {
               exampleWidget = Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("       $example"));
+                  child: Text("        $example"));
             }
             definitionWidgets.add(exampleWidget);
           }
         }
 
-        definitionWidgets.add(SizedBox(height: 10));
+        definitionWidgets.add(const SizedBox(height: 15));
       }
-    } else {
+    } else if (description["all_meanings"].length > 0) {
       for (int i = 0; i <= description["all_meanings"].length - 1; i++) {
         Align meaningWidget = Align(
             alignment: Alignment.centerLeft,
             child: Text("${description["all_meanings"][i]}",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade800)));
         definitionWidgets.add(meaningWidget);
       }
     }
     return Column(children: [
+      description["audio_links"].length == 0
+          ? const SizedBox(height: 10)
+          : const SizedBox.shrink(),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(
           "${description["syllable"]} (${description["pos"]})",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
         ),
         description["audio_links"].length == 0
-            ? SizedBox.shrink()
+            ? const SizedBox.shrink()
             : IconButton(
                 onPressed: () async =>
                     await audioPlayer.play(description["audio_links"][0]),
@@ -81,8 +104,105 @@ class _DictState extends State<Dict> {
                 tooltip: "Play Word Audio")
       ]),
       description["audio_links"].length == 0
-          ? SizedBox(height: 15)
-          : SizedBox.shrink(),
+          ? const SizedBox(height: 15)
+          : const SizedBox.shrink(),
+      ...definitionWidgets
+    ]);
+  }
+
+  Widget buildThesaurusDescription(dynamic description) {
+    List<Widget> definitionWidgets = <Widget>[];
+    if (description["definitions"].length > 0) {
+      for (int i = 0; i <= description["definitions"].length - 1; i++) {
+        String verbDivider =
+            description["definitions"][i]["verb_divider"].split(" ")[0];
+        String meaning = description["definitions"][i]["meaning"];
+        List<String> examples =
+            description["definitions"][i]["examples"].cast<String>();
+        List<String> categories =
+            description["definitions"][i]["categories"].cast<String>();
+        List<String> synonymousPhrases =
+            description["definitions"][i]["synonymous_phrases"].cast<String>();
+        List<String> synonyms =
+            description["definitions"][i]["synonyms"].cast<String>();
+        List<String> antonyms =
+            description["definitions"][i]["antonyms"].cast<String>();
+
+        Align meaningWidget = Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+                "${i + 1}  ${verbDivider == "" ? "" : "[$verbDivider] "}${categories.isEmpty ? "" : "[${categories.join("/")}] "}$meaning",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade800)));
+        definitionWidgets.add(meaningWidget);
+
+        if (examples.isNotEmpty) {
+          bool isFirstExample = true;
+          for (String example in examples) {
+            Align exampleWidget;
+            if (isFirstExample) {
+              exampleWidget = Align(
+                  alignment: Alignment.centerLeft,
+                  child: getRichTextSpan("e.g. ", example));
+              isFirstExample = false;
+            } else {
+              exampleWidget = Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("        $example"));
+            }
+            definitionWidgets.add(exampleWidget);
+          }
+        }
+
+        if (synonymousPhrases.isNotEmpty) {
+          Align synPhrasesWidget = Align(
+              alignment: Alignment.centerLeft,
+              child: getRichTextSpan(
+                  "syn (phrases): ",
+                  synonymousPhrases.join(
+                      ", "))); // Text("syn (phrases): ${synonymous_phrases.join(", ")}"));
+          definitionWidgets.add(synPhrasesWidget);
+        }
+
+        if (synonyms.isNotEmpty) {
+          Align synonymsWidget = Align(
+              alignment: Alignment.centerLeft,
+              child: getRichTextSpan("syn: ",
+                  synonyms.join(", "))); //Text("syn: ${synonyms.join(", ")}"));
+          definitionWidgets.add(synonymsWidget);
+        }
+
+        if (antonyms.isNotEmpty) {
+          Align antonymsWidget = Align(
+              alignment: Alignment.centerLeft,
+              child: getRichTextSpan("ant: ",
+                  antonyms.join(", "))); //Text("ant: ${antonyms.join(", ")}"));
+          definitionWidgets.add(antonymsWidget);
+        }
+
+        definitionWidgets.add(const SizedBox(height: 15));
+      }
+    } else if (description["all_meanings"].length > 0) {
+      for (int i = 0; i <= description["all_meanings"].length - 1; i++) {
+        Align meaningWidget = Align(
+            alignment: Alignment.centerLeft,
+            child: Text("${description["all_meanings"][i]}",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade800)));
+        definitionWidgets.add(meaningWidget);
+      }
+    }
+    return Column(children: [
+      const SizedBox(height: 10),
+      Text(
+        "${description["word"]} (${description["pos"]})",
+        style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 15),
       ...definitionWidgets
     ]);
   }
@@ -95,16 +215,19 @@ class _DictState extends State<Dict> {
           body: descriptions == null
               ? Container(
                   alignment: Alignment.center,
-                  child: Text("Not Found in Dictionary!",
-                      style: TextStyle(fontSize: 28)))
+                  child: const Text("Not Found in Collegiate Dictionary!",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w600)))
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(14, 5, 14, 5),
                   itemCount: descriptions.length * 2 - 1,
                   itemBuilder: (context, item) {
-                    if (item.isOdd)
-                      return Divider(thickness: 3.0, color: Colors.orange);
+                    if (item.isOdd) {
+                      return const Divider(
+                          thickness: 3.0, color: Colors.orange);
+                    }
                     final index = item ~/ 2;
-                    return buildDescription(descriptions[index]);
+                    return buildDictionaryDescription(descriptions[index]);
                   }));
     }));
   }
@@ -114,11 +237,23 @@ class _DictState extends State<Dict> {
       final descriptions = globals.thesaurusCache[word];
       return Scaffold(
           appBar: AppBar(title: Text(word), centerTitle: true),
-          body: ListView(
-            children: [
-              Text(descriptions.toString()),
-            ],
-          ));
+          body: descriptions == null
+              ? Container(
+                  alignment: Alignment.center,
+                  child: const Text("Not Found in Collegiate Thesaurus!",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w600)))
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(14, 5, 14, 5),
+                  itemCount: descriptions.length * 2 - 1,
+                  itemBuilder: (context, item) {
+                    if (item.isOdd) {
+                      return const Divider(
+                          thickness: 3.0, color: Colors.orange);
+                    }
+                    final index = item ~/ 2;
+                    return buildThesaurusDescription(descriptions[index]);
+                  }));
     }));
   }
 
@@ -153,7 +288,7 @@ class _DictState extends State<Dict> {
 
   dynamic sendWordToDictionary(String word) async {
     setState(() => loading = true);
-    var descriptions = await dict_search.search_dictionary(word);
+    var descriptions = await dict_search.searchDictionary(word);
     globals.dictionaryCache[word] = descriptions;
     setState(() => loading = false);
     return globals.dictionaryCache[word];
@@ -161,7 +296,7 @@ class _DictState extends State<Dict> {
 
   dynamic sendWordToThesaurus(String word) async {
     setState(() => loading = true);
-    var descriptions = await dict_search.search_thesaurus(word);
+    var descriptions = await dict_search.searchThesaurus(word);
     globals.thesaurusCache[word] = descriptions;
     setState(() => loading = false);
     return globals.thesaurusCache[word];
@@ -170,7 +305,7 @@ class _DictState extends State<Dict> {
   Widget buildRow(String word, int index) {
     word = word.capitalize!;
     return ListTile(
-        title: Text(word, style: TextStyle(fontSize: 18.0)),
+        title: Text(word, style: const TextStyle(fontSize: 18.0)),
         tileColor:
             index % 2 == 0 ? Colors.orange.shade200 : Colors.yellow.shade300,
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -202,14 +337,15 @@ class _DictState extends State<Dict> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Dictionary Search'), centerTitle: true),
+        appBar:
+            AppBar(title: const Text('Dictionary Search'), centerTitle: true),
         body: loading
             ? globals.startProgressIndicator(context)
             : ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: globals.wordList!.length * 2,
                 itemBuilder: (context, item) {
-                  if (item.isOdd) return Divider();
+                  if (item.isOdd) return const Divider();
                   final index = item ~/ 2;
                   return buildRow(globals.wordList![index], index);
                 }));

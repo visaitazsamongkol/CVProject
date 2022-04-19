@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-
-import "dart:async";
-import "dart:io";
-import "package:flutter/cupertino.dart";
-import 'package:image_picker/image_picker.dart';
-import './home.dart';
+import 'home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,6 +15,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.purple,
         ),
-        home: Home());
+        home: const Home());
   }
 }

@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import './globals.dart' as globals;
-import './dict.dart';
+import 'globals.dart' as globals;
+import 'dict.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -51,7 +49,7 @@ class _HomeState extends State<Home> {
   void goToDictPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Dict()),
+      MaterialPageRoute(builder: (context) => const Dict()),
     );
   }
 
@@ -73,12 +71,12 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home'), centerTitle: true),
+      appBar: AppBar(title: const Text('Home'), centerTitle: true),
       body: loading
           ? globals.startProgressIndicator(context)
           : ListView(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
                 outputImage != null
@@ -94,10 +92,10 @@ class _HomeState extends State<Home> {
                     ? Row(children: [
                         Expanded(
                             child: Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(30.0, 30.0, 10.0, 30.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    30.0, 30.0, 10.0, 30.0),
                                 child: ElevatedButton(
-                                  child: Text('search up!'),
+                                  child: const Text('Search Up!'),
                                   onPressed: () {
                                     goToDictPage();
                                   },
@@ -105,17 +103,17 @@ class _HomeState extends State<Home> {
                                     backgroundColor:
                                         MaterialStateProperty.all(Colors.green),
                                     padding: MaterialStateProperty.all(
-                                        EdgeInsets.all(12)),
+                                        const EdgeInsets.all(12)),
                                     textStyle: MaterialStateProperty.all(
-                                        TextStyle(fontSize: 16)),
+                                        const TextStyle(fontSize: 16)),
                                   ),
                                 ))),
                         Expanded(
                             child: Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(10.0, 30.0, 30.0, 30.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    10.0, 30.0, 30.0, 30.0),
                                 child: ElevatedButton(
-                                  child: Text('retake picture'),
+                                  child: const Text('Retake Picture'),
                                   onPressed: () {
                                     abortPicture();
                                   },
@@ -123,26 +121,26 @@ class _HomeState extends State<Home> {
                                     backgroundColor:
                                         MaterialStateProperty.all(Colors.red),
                                     padding: MaterialStateProperty.all(
-                                        EdgeInsets.all(12)),
+                                        const EdgeInsets.all(12)),
                                     textStyle: MaterialStateProperty.all(
-                                        TextStyle(fontSize: 16)),
+                                        const TextStyle(fontSize: 16)),
                                   ),
                                 ))),
                       ])
                     : Padding(
                         padding: const EdgeInsets.all(30.0),
                         child: ElevatedButton(
-                          child: Text('Take Picture'),
+                          child: const Text('Take Picture'),
                           onPressed: () {
                             takePicture();
                           },
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStateProperty.all(Colors.purple),
-                            padding:
-                                MaterialStateProperty.all(EdgeInsets.all(12)),
+                            padding: MaterialStateProperty.all(
+                                const EdgeInsets.all(12)),
                             textStyle: MaterialStateProperty.all(
-                                TextStyle(fontSize: 16)),
+                                const TextStyle(fontSize: 16)),
                           ),
                         )),
               ],

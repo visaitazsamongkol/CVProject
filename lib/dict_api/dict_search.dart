@@ -1,25 +1,24 @@
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
-
 import "dict_key.dart" as key;
 import "utils.dart" as utils;
 
-dynamic search_thesaurus(String word) async {
+dynamic searchThesaurus(String word) async {
   word = word.toLowerCase();
   var uri = Uri.https("www.dictionaryapi.com",
-      "/api/v3/references/thesaurus/json/${word}", {"key": key.thesaurus_key});
+      "/api/v3/references/thesaurus/json/$word", {"key": key.thesaurusKey});
   var response = await http.get(uri);
   var dictionary = convert.jsonDecode(response.body);
-  bool exact_word_found = false;
-  var word_dicts = [];
+  bool exactWordFound = false;
+  var wordDicts = [];
   try {
-    var all_pos = [];
-    for (var each_word in dictionary) {
-      if (utils.del_non_alpha_endings(each_word['meta']['id']) == word) {
-        exact_word_found = true;
-        if (!all_pos.contains(each_word['fl'].toLowerCase())) {
-          all_pos.add(each_word['fl'].toLowerCase());
-          word_dicts.add(each_word);
+    var allPos = [];
+    for (var eachWord in dictionary) {
+      if (utils.delNonAlphaEndings(eachWord['meta']['id']) == word) {
+        exactWordFound = true;
+        if (!allPos.contains(eachWord['fl'].toLowerCase())) {
+          allPos.add(eachWord['fl'].toLowerCase());
+          wordDicts.add(eachWord);
         }
       }
     }
@@ -27,59 +26,60 @@ dynamic search_thesaurus(String word) async {
     return null;
   }
 
-  if (!exact_word_found) {
-    word_dicts.add(dictionary[0]);
+  if (!exactWordFound) {
+    wordDicts.add(dictionary[0]);
   }
 
   // descriptions consist of description (result we get from word)
   var descriptions = [];
-  for (var word_dict in word_dicts) {
+  for (var wordDict in wordDicts) {
     var description = {};
 
-    if (exact_word_found) {
+    if (exactWordFound) {
       description['word'] = word;
     } else {
-      description['word'] = word_dict['meta']['id'];
+      description['word'] = wordDict['meta']['id'];
     }
 
     // part-of-speech
-    description['pos'] = word_dict['fl'];
+    description['pos'] = wordDict['fl'];
     // stems (similar words) (list)
-    description['stems'] = word_dict['meta']['stems'];
+    description['stems'] = wordDict['meta']['stems'];
     // meanings (all meanings summary) (list)
     description['all_meanings'] = [];
-    for (var meaning in word_dict['shortdef']) {
-      description['all_meanings'].add(utils.manage_braces(meaning));
+    for (var meaning in wordDict['shortdef']) {
+      description['all_meanings'].add(utils.manageBraces(meaning));
     }
     // definitions (meaning, example, syn, ant) (list)
     description['definitions'] = [];
-    for (var divider in word_dict['def']) {
-      var verb_divider = "";
+    for (var divider in wordDict['def']) {
+      var verbDivider = "";
       if (divider.keys.contains('vd')) {
-        verb_divider = divider['vd'];
+        verbDivider = divider['vd'];
       }
-      for (var sense_seq in divider['sseq']) {
-        for (var sense in sense_seq) {
+      for (var senseSeq in divider['sseq']) {
+        for (var sense in senseSeq) {
           if (sense[0] != 'sense') continue;
           sense = sense[1];
           var definition = {};
 
           definition['meaning'] = '';
           definition['examples'] = [];
-          for (var dt_element in sense['dt']) {
-            if (dt_element[0] == 'text') {
-              definition['meaning'] = utils.manage_braces(dt_element[1]);
-            } else if (dt_element[0] == 'vis') {
-              for (var ex in dt_element[1]) {
-                definition['examples'].add(utils.manage_braces(ex['t']));
+          for (var dtElement in sense['dt']) {
+            if (dtElement[0] == 'text') {
+              definition['meaning'] = utils.manageBraces(dtElement[1]);
+            } else if (dtElement[0] == 'vis') {
+              for (var ex in dtElement[1]) {
+                definition['examples'].add(utils.manageBraces(ex['t']));
               }
             }
           }
 
-          if (utils.del_non_alpha_endings(definition['meaning']) == '')
+          if (utils.delNonAlphaEndings(definition['meaning']) == '') {
             continue;
+          }
 
-          definition['verb_divider'] = verb_divider;
+          definition['verb_divider'] = verbDivider;
 
           definition['categories'] = [];
           if (sense.keys.contains('sls')) {
@@ -115,24 +115,22 @@ dynamic search_thesaurus(String word) async {
   return descriptions;
 }
 
-dynamic search_dictionary(String word) async {
+dynamic searchDictionary(String word) async {
   word = word.toLowerCase();
-  var uri = Uri.https(
-      "www.dictionaryapi.com",
-      "/api/v3/references/collegiate/json/${word}",
-      {"key": key.dictionary_key});
+  var uri = Uri.https("www.dictionaryapi.com",
+      "/api/v3/references/collegiate/json/$word", {"key": key.dictionaryKey});
   var response = await http.get(uri);
   var dictionary = convert.jsonDecode(response.body);
-  var word_dicts = [];
-  bool exact_word_found = false;
+  var wordDicts = [];
+  bool exactWordFound = false;
   try {
-    var all_pos = [];
-    for (var each_word in dictionary) {
-      if (utils.del_non_alpha_endings(each_word['meta']['id']) == word) {
-        exact_word_found = true;
-        if (!all_pos.contains(each_word['fl'].toLowerCase())) {
-          all_pos.add(each_word['fl'].toLowerCase());
-          word_dicts.add(each_word);
+    var allPos = [];
+    for (var eachWord in dictionary) {
+      if (utils.delNonAlphaEndings(eachWord['meta']['id']) == word) {
+        exactWordFound = true;
+        if (!allPos.contains(eachWord['fl'].toLowerCase())) {
+          allPos.add(eachWord['fl'].toLowerCase());
+          wordDicts.add(eachWord);
         }
       }
     }
@@ -140,58 +138,59 @@ dynamic search_dictionary(String word) async {
     return null;
   }
 
-  if (!exact_word_found) {
-    word_dicts.add(dictionary[0]);
+  if (!exactWordFound) {
+    wordDicts.add(dictionary[0]);
   }
 
   var descriptions = [];
-  for (var word_dict in word_dicts) {
+  for (var wordDict in wordDicts) {
     var description = {};
 
-    if (exact_word_found) {
+    if (exactWordFound) {
       description['word'] = word;
     } else {
-      description['word'] = word_dict['meta']['id'];
+      description['word'] = wordDict['meta']['id'];
     }
 
     // part-of-speech
-    description['pos'] = word_dict['fl'];
+    description['pos'] = wordDict['fl'];
     // stems (similar words) (list)
-    description['stems'] = word_dict['meta']['stems'];
+    description['stems'] = wordDict['meta']['stems'];
     // meanings (all meanings summary) (list)
     description['all_meanings'] = [];
-    for (var meaning in word_dict['shortdef']) {
-      description['all_meanings'].add(utils.manage_braces(meaning));
+    for (var meaning in wordDict['shortdef']) {
+      description['all_meanings'].add(utils.manageBraces(meaning));
     }
     // definitions (meaning, example, syn, ant) (list)
     description['definitions'] = [];
-    for (var divider in word_dict['def']) {
-      var verb_divider = "";
+    for (var divider in wordDict['def']) {
+      var verbDivider = "";
       if (divider.keys.contains('vd')) {
-        verb_divider = divider['vd'];
+        verbDivider = divider['vd'];
       }
-      for (var sense_seq in divider['sseq']) {
-        for (var sense in sense_seq) {
+      for (var senseSeq in divider['sseq']) {
+        for (var sense in senseSeq) {
           if (sense[0] != 'sense') continue;
           sense = sense[1];
           var definition = {};
 
           definition['meaning'] = '';
           definition['examples'] = [];
-          for (var dt_element in sense['dt']) {
-            if (dt_element[0] == 'text') {
-              definition['meaning'] = utils.manage_braces(dt_element[1]);
-            } else if (dt_element[0] == 'vis') {
-              for (var ex in dt_element[1]) {
-                definition['examples'].add(utils.manage_braces(ex['t']));
+          for (var dtElement in sense['dt']) {
+            if (dtElement[0] == 'text') {
+              definition['meaning'] = utils.manageBraces(dtElement[1]);
+            } else if (dtElement[0] == 'vis') {
+              for (var ex in dtElement[1]) {
+                definition['examples'].add(utils.manageBraces(ex['t']));
               }
             }
           }
 
-          if (utils.del_non_alpha_endings(definition['meaning']) == '')
+          if (utils.delNonAlphaEndings(definition['meaning']) == '') {
             continue;
+          }
 
-          definition['verb_divider'] = verb_divider;
+          definition['verb_divider'] = verbDivider;
 
           definition['categories'] = [];
           if (sense.keys.contains('sls')) {
@@ -200,14 +199,14 @@ dynamic search_dictionary(String word) async {
           definition['closely_related_meaning'] = '';
           definition['closely_related_examples'] = [];
           if (sense.keys.contains('sdsense')) {
-            for (var dt_element in sense['sdsense']['dt']) {
-              if (dt_element[0] == 'text') {
+            for (var dtElement in sense['sdsense']['dt']) {
+              if (dtElement[0] == 'text') {
                 definition['closely_related_meaning'] =
-                    utils.manage_braces(dt_element[1]);
-              } else if (dt_element[0] == 'vis') {
-                for (var ex in dt_element[1]) {
+                    utils.manageBraces(dtElement[1]);
+              } else if (dtElement[0] == 'vis') {
+                for (var ex in dtElement[1]) {
                   definition['closely_related_examples']
-                      .add(utils.manage_braces(ex['t']));
+                      .add(utils.manageBraces(ex['t']));
                 }
               }
             }
@@ -218,28 +217,28 @@ dynamic search_dictionary(String word) async {
     }
 
     // syllable division
-    description['syllable'] = word_dict['hwi']['hw'];
+    description['syllable'] = wordDict['hwi']['hw'];
     // audio link
     description['audio_links'] = [];
-    if (word_dict['hwi'].keys.contains('prs')) {
-      for (var sound_obj in word_dict['hwi']['prs']) {
-        if (sound_obj.keys.contains('sound')) {
-          var audio_filename = sound_obj['sound']['audio'];
+    if (wordDict['hwi'].keys.contains('prs')) {
+      for (var soundObj in wordDict['hwi']['prs']) {
+        if (soundObj.keys.contains('sound')) {
+          var audioFilename = soundObj['sound']['audio'];
           var punctuations = '''[!"#\$%&\'()*+,-./:;<=>?@[\\]^_`{|}~]''';
-          var audio_subdir = '';
+          var audioSubdir = '';
           final digits = RegExp(r'[0-9]');
-          if (audio_filename.startsWith('bix')) {
-            audio_subdir = 'bix';
-          } else if (audio_filename.startsWith('gg')) {
-            audio_subdir = 'gg';
-          } else if (punctuations.contains(audio_filename[0]) ||
-              digits.hasMatch(audio_filename[0])) {
-            audio_subdir = 'number';
+          if (audioFilename.startsWith('bix')) {
+            audioSubdir = 'bix';
+          } else if (audioFilename.startsWith('gg')) {
+            audioSubdir = 'gg';
+          } else if (punctuations.contains(audioFilename[0]) ||
+              digits.hasMatch(audioFilename[0])) {
+            audioSubdir = 'number';
           } else {
-            audio_subdir = audio_filename[0];
+            audioSubdir = audioFilename[0];
           }
           description['audio_links'].add(
-              'https://media.merriam-webster.com/audio/prons/en/us/mp3/${audio_subdir}/${audio_filename}.mp3');
+              'https://media.merriam-webster.com/audio/prons/en/us/mp3/$audioSubdir/$audioFilename.mp3');
         }
       }
     }
