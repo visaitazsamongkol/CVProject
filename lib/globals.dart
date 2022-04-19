@@ -3,8 +3,8 @@ library dictionary_search_ocr_client.globals;
 import 'package:flutter/material.dart';
 
 List<String>? wordList;
-Map<String, List<Map<String, dynamic>>> dictionaryCache = {};
-Map<String, List<Map<String, dynamic>>> thesaurusCache = {};
+Map<String, dynamic> dictionaryCache = {};
+Map<String, dynamic> thesaurusCache = {};
 
 Container startProgressIndicator(BuildContext context) {
   return Container(

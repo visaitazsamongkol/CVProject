@@ -37,6 +37,7 @@ __pycache__
 
 # Web related
 lib/generated_plugin_registrant.dart
+lib/dict_api/dict_key.dart
 
 # Symbolication related
 app.*.symbols

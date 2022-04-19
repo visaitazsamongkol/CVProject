@@ -5,6 +5,7 @@ import 'package:string_extensions/string_extensions.dart';
 import 'package:http/http.dart' as http;
 import 'package:mdi/mdi.dart';
 import './globals.dart' as globals;
+import './dict_api/dict_search.dart' as dict_search;
 
 class Dict extends StatefulWidget {
   @override
@@ -40,33 +41,49 @@ class _DictState extends State<Dict> {
     }));
   }
 
-  Future<http.Response> sendWordToDictionary(String word) async {
-    var url =
-        "https://dictionary-search-ocr-server.herokuapp.com/search/dictionary";
-    //encode Map to JSON
-    var res = await http.post(Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode([word]));
-    if (res.statusCode == 200) {
-      var resJson = json.decode(res.body);
-      globals.dictionaryCache[word] =
-          resJson[word].cast<Map<String, dynamic>>();
-    }
-    return res;
+  // Future<http.Response> sendWordToDictionary(String word) async {
+  //   var url =
+  //       "https://dictionary-search-ocr-server.herokuapp.com/search/dictionary";
+  //   //encode Map to JSON
+  //   var res = await http.post(Uri.parse(url),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: json.encode([word]));
+  //   if (res.statusCode == 200) {
+  //     var resJson = json.decode(res.body);
+  //     globals.dictionaryCache[word] =
+  //         resJson[word].cast<Map<String, dynamic>>();
+  //   }
+  //   return res;
+  // }
+
+  // Future<http.Response> sendWordToThesaurus(String word) async {
+  //   var url =
+  //       "https://dictionary-search-ocr-server.herokuapp.com/search/thesaurus";
+  //   //encode Map to JSON
+  //   var res = await http.post(Uri.parse(url),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: json.encode([word]));
+  //   if (res.statusCode == 200) {
+  //     var resJson = json.decode(res.body);
+  //     globals.thesaurusCache[word] = resJson[word].cast<Map<String, dynamic>>();
+  //   }
+  //   return res;
+  // }
+
+  dynamic sendWordToDictionary(String word) async {
+    setState(() => loading = true);
+    var descriptions = await dict_search.search_dictionary(word);
+    globals.dictionaryCache[word] = descriptions;
+    setState(() => loading = false);
+    return globals.dictionaryCache[word];
   }
 
-  Future<http.Response> sendWordToThesaurus(String word) async {
-    var url =
-        "https://dictionary-search-ocr-server.herokuapp.com/search/thesaurus";
-    //encode Map to JSON
-    var res = await http.post(Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode([word]));
-    if (res.statusCode == 200) {
-      var resJson = json.decode(res.body);
-      globals.thesaurusCache[word] = resJson[word].cast<Map<String, dynamic>>();
-    }
-    return res;
+  dynamic sendWordToThesaurus(String word) async {
+    setState(() => loading = true);
+    var descriptions = await dict_search.search_thesaurus(word);
+    globals.thesaurusCache[word] = descriptions;
+    setState(() => loading = false);
+    return globals.thesaurusCache[word];
   }
 
   Widget buildRow(String word, int index) {
@@ -81,11 +98,9 @@ class _DictState extends State<Dict> {
               icon: const Icon(Mdi.alphaDBox),
               color: Colors.green,
               onPressed: () async {
-                setState(() => loading = true);
                 if (!globals.dictionaryCache.containsKey(word)) {
                   await sendWordToDictionary(word);
                 }
-                setState(() => loading = false);
                 showDictionaryDescription(word);
               }),
           IconButton(
@@ -93,11 +108,9 @@ class _DictState extends State<Dict> {
               icon: const Icon(Mdi.alphaTBox),
               color: Colors.blue,
               onPressed: () async {
-                setState(() => loading = true);
                 if (!globals.thesaurusCache.containsKey(word)) {
                   await sendWordToThesaurus(word);
                 }
-                setState(() => loading = false);
                 showThesaurusDescription(word);
               }),
         ]));
