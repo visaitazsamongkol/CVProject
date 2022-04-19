@@ -16,7 +16,7 @@ For help getting started with Flutter, view our
 samples, guidance on mobile development, and a full API reference.
 
 - Add a file name dict_key.dart inside the dict_api directory with the following keys (merrium dictionary api key)
-    - var dictionary_key = "<dictionary_key>";
-    - var thesaurus_key = "<thesaurus_key>";
+    - var dictionaryKey = "<dictionary_key>";
+    - var thesaurusKey = "<thesaurus_key>";
 
 - Run application using command: **flutter run --no-sound-null-safety**
