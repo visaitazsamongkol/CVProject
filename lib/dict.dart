@@ -19,39 +19,50 @@ class _DictState extends State<Dict> {
 
   Widget buildDescription(dynamic description) {
     List<Widget> definitionWidgets = <Widget>[];
-    for (int i = 0; i <= description["definitions"].length - 1; i++) {
-      String verbDivider =
-          description["definitions"][i]["verb_divider"].split(" ")[0];
-      String meaning = description["definitions"][i]["meaning"];
-      List<String> examples =
-          description["definitions"][i]["examples"].cast<String>();
-      print(meaning);
+    if (description["definitions"].length > 0) {
+      for (int i = 0; i <= description["definitions"].length - 1; i++) {
+        String verbDivider =
+            description["definitions"][i]["verb_divider"].split(" ")[0];
+        String meaning = description["definitions"][i]["meaning"];
+        List<String> examples =
+            description["definitions"][i]["examples"].cast<String>();
+        print(meaning);
 
-      Align meaningWidget = Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-              "${i + 1} ${verbDivider == "" ? "" : "[$verbDivider] "}$meaning",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
-      definitionWidgets.add(meaningWidget);
+        Align meaningWidget = Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+                "${i + 1} ${verbDivider == "" ? "" : "[$verbDivider] "}$meaning",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
+        definitionWidgets.add(meaningWidget);
 
-      if (examples.length != 0) {
-        bool isFirstExample = true;
-        for (String example in examples) {
-          Align exampleWidget;
-          if (isFirstExample) {
-            exampleWidget = Align(
-                alignment: Alignment.centerLeft, child: Text("e.g. $example"));
-            isFirstExample = false;
-          } else {
-            exampleWidget = Align(
-                alignment: Alignment.centerLeft,
-                child: Text("       $example"));
+        if (examples.length != 0) {
+          bool isFirstExample = true;
+          for (String example in examples) {
+            Align exampleWidget;
+            if (isFirstExample) {
+              exampleWidget = Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("e.g. $example"));
+              isFirstExample = false;
+            } else {
+              exampleWidget = Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("       $example"));
+            }
+            definitionWidgets.add(exampleWidget);
           }
-          definitionWidgets.add(exampleWidget);
         }
-      }
 
-      definitionWidgets.add(SizedBox(height: 10));
+        definitionWidgets.add(SizedBox(height: 10));
+      }
+    } else {
+      for (int i = 0; i <= description["all_meanings"].length - 1; i++) {
+        Align meaningWidget = Align(
+            alignment: Alignment.centerLeft,
+            child: Text("${description["all_meanings"][i]}",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
+        definitionWidgets.add(meaningWidget);
+      }
     }
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -67,7 +78,7 @@ class _DictState extends State<Dict> {
                 icon: const Icon(Icons.volume_up),
                 iconSize: 24,
                 color: Colors.grey,
-                tooltip: "Play the word audio")
+                tooltip: "Play Word Audio")
       ]),
       description["audio_links"].length == 0
           ? SizedBox(height: 15)
@@ -167,6 +178,7 @@ class _DictState extends State<Dict> {
               iconSize: 30.0,
               icon: const Icon(Mdi.alphaDBox),
               color: Colors.green,
+              tooltip: "Collegiate Dictionary Search",
               onPressed: () async {
                 if (!globals.dictionaryCache.containsKey(word)) {
                   await sendWordToDictionary(word);
@@ -177,6 +189,7 @@ class _DictState extends State<Dict> {
               iconSize: 30.0,
               icon: const Icon(Mdi.alphaTBox),
               color: Colors.blue,
+              tooltip: "Collegiate Thesaurus Search",
               onPressed: () async {
                 if (!globals.thesaurusCache.containsKey(word)) {
                   await sendWordToThesaurus(word);

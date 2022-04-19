@@ -13,10 +13,14 @@ dynamic search_thesaurus(String word) async {
   bool exact_word_found = false;
   var word_dicts = [];
   try {
+    var all_pos = [];
     for (var each_word in dictionary) {
       if (utils.del_non_alpha_endings(each_word['meta']['id']) == word) {
         exact_word_found = true;
-        word_dicts.add(each_word);
+        if (!all_pos.contains(each_word['fl'].toLowerCase())) {
+          all_pos.add(each_word['fl'].toLowerCase());
+          word_dicts.add(each_word);
+        }
       }
     }
   } catch (_) {
@@ -122,10 +126,14 @@ dynamic search_dictionary(String word) async {
   var word_dicts = [];
   bool exact_word_found = false;
   try {
+    var all_pos = [];
     for (var each_word in dictionary) {
       if (utils.del_non_alpha_endings(each_word['meta']['id']) == word) {
         exact_word_found = true;
-        word_dicts.add(each_word);
+        if (!all_pos.contains(each_word['fl'].toLowerCase())) {
+          all_pos.add(each_word['fl'].toLowerCase());
+          word_dicts.add(each_word);
+        }
       }
     }
   } catch (_) {
