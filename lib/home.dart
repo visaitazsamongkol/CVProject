@@ -19,7 +19,7 @@ class _HomeState extends State<Home> {
 
   void takePicture() async {
     XFile? pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.camera, //ImageSource.gallery
+      source: ImageSource.gallery, //ImageSource.camera
       maxHeight: 1080,
       maxWidth: 1080,
     );

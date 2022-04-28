@@ -3,7 +3,7 @@
    <uses-permission android:name="android.permission.CAMERA" />
    <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="dictionary_search_ocr_client"
+        android:label="DictSearchOCR"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

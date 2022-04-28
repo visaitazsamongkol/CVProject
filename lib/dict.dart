@@ -83,14 +83,17 @@ class _DictState extends State<Dict> {
                     color: Colors.indigo.shade800)));
         definitionWidgets.add(meaningWidget);
       }
+
+      definitionWidgets.add(const SizedBox(height: 15));
     }
+
     return Column(children: [
       description["audio_links"].length == 0
           ? const SizedBox(height: 10)
           : const SizedBox.shrink(),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(
-          "${description["syllable"]} (${description["pos"]})",
+          "${description["syllable"].toLowerCase()} (${description["pos"]})",
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
         ),
         description["audio_links"].length == 0
@@ -195,11 +198,14 @@ class _DictState extends State<Dict> {
                     color: Colors.indigo.shade800)));
         definitionWidgets.add(meaningWidget);
       }
+
+      definitionWidgets.add(const SizedBox(height: 15));
     }
+
     return Column(children: [
       const SizedBox(height: 10),
       Text(
-        "${description["word"]} (${description["pos"]})",
+        "${description["word"].toLowerCase()} (${description["pos"]})",
         style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
       ),
       const SizedBox(height: 15),
