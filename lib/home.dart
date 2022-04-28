@@ -19,7 +19,7 @@ class _HomeState extends State<Home> {
 
   void takePicture() async {
     XFile? pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery, //used for test
+      source: ImageSource.gallery, //ImageSource.camera
       maxHeight: 1080,
       maxWidth: 1080,
     );
@@ -30,7 +30,8 @@ class _HomeState extends State<Home> {
 
   void sendPicture(File imageFile) async {
     setState(() => loading = true);
-    var url = "https://dictionary-search-ocr-server.herokuapp.com/ocr";
+    var url =
+        "https://visaitazsamongkol.herokuapp.com/ocr"; //https://dictionary-search-ocr-server.herokuapp.com/ocr
     var req = http.MultipartRequest('POST', Uri.parse(url));
     req.files.add(http.MultipartFile(
         'image', imageFile.readAsBytes().asStream(), imageFile.lengthSync(),
@@ -58,15 +59,6 @@ class _HomeState extends State<Home> {
       outputImage = null;
     });
   }
-
-  // void getPicture() async {
-  //   var url = "http://192.168.1.105:5000/image";
-  //   var jsonData = await http.get(Uri.parse(url));
-  //   var _image = jsonData.bodyBytes;
-  //   setState(() {
-  //     receivedImage = _image;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
