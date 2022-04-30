@@ -40,6 +40,10 @@ class _HomeState extends State<Home> {
     if (res.statusCode == 200) {
       var resJson = json.decode(res.body);
       globals.wordList = resJson['words'].cast<String>();
+      for (int i = 0; i <= globals.wordList!.length - 1; i++) {
+        globals.wordList![i] = globals.wordList![i].toLowerCase();
+      }
+      globals.wordList!.sort();
       setState(() {
         outputImage = Image.memory(base64Decode(resJson['base64_string']));
       });
